@@ -22,6 +22,8 @@ ESTADOS = ["Esperando", "Respondieron", "Entrevista", "Descartado", "Rechazado"]
 ESTADO_INICIAL = "Esperando"
 DIAS_SEGUIMIENTO = 7
 CAMPOS = ["Fecha", "Empresa", "Rol", "Carril", "Canal", "Publicado hace", "Salario", "Link CV"]
+CAMPO_OPCIONAL = "Postulantes"  # 9.º campo, opcional
+SIN_DATO = "—"
 
 
 @st.cache_data(ttl=60, show_spinner="Leyendo Google Docs…")
@@ -50,16 +52,19 @@ def parsear(texto: str) -> pd.DataFrame:
     filas = []
     for linea in texto.lstrip("\ufeff").splitlines():
         partes = [p.strip() for p in linea.split("|")]
-        if len(partes) != len(CAMPOS):
+        if len(partes) == len(CAMPOS):
+            partes.append("")
+        if len(partes) != len(CAMPOS) + 1:
             continue
         try:
             fecha = datetime.strptime(partes[0], "%d/%m/%Y").date()
         except ValueError:
             continue
-        fila = dict(zip(CAMPOS, partes))
+        fila = dict(zip(CAMPOS + [CAMPO_OPCIONAL], partes))
         fila["Fecha"] = fecha
+        fila[CAMPO_OPCIONAL] = fila[CAMPO_OPCIONAL] or SIN_DATO
         filas.append(fila)
-    df = pd.DataFrame(filas, columns=CAMPOS)
+    df = pd.DataFrame(filas, columns=CAMPOS + [CAMPO_OPCIONAL])
     df["id"] = df["Fecha"].astype(str) + "|" + df["Empresa"] + "|" + df["Rol"]
     return df
 
@@ -132,7 +137,7 @@ st.header("Todas las postulaciones")
 st.caption("Editá el estado y la fecha de último contacto, y después tocá «Guardar cambios».")
 
 tabla = construir_tabla(df, estados)
-columnas = ["Fecha", "Empresa", "Rol", "Carril", "Canal", "Publicado hace", "Salario",
+columnas = ["Fecha", "Empresa", "Rol", "Carril", "Canal", "Publicado hace", "Salario", "Postulantes",
             "Estado", "Último contacto", "Link CV"]
 editada = st.data_editor(
     tabla[columnas],
@@ -181,7 +186,7 @@ if seg.empty:
     st.success("Nada pendiente de seguimiento. 🎉")
 else:
     st.dataframe(
-        seg[["Empresa", "Rol", "Estado", "Fecha", "Último contacto", "Días sin contacto", "Link CV"]],
+        seg[["Empresa", "Rol", "Estado", "Postulantes", "Fecha", "Último contacto", "Días sin contacto", "Link CV"]],
         hide_index=True,
         width="stretch",
         column_config={

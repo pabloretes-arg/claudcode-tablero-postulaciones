@@ -12,6 +12,13 @@ Fecha | Empresa | Rol | Carril | Canal | Publicado hace | Salario | Link CV
 06/11/2026 | Empresa SA | Rol | Sales | Portal | 2 h | 5.000 | https://...
 ```
 
+Campo **opcional** al final: cantidad de postulantes que muestra la oferta
+(un número o texto, p. ej. `47` o `Más de 100`). Si falta, se muestra «—».
+
+```
+06/11/2026 | Empresa SA | Rol | Sales | Portal | 2 h | 5.000 | https://... | 47
+```
+
 Las líneas que no tengan ese formato se ignoran.
 
 ## Instalación
