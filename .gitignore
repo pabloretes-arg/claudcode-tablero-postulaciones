@@ -1,0 +1,9 @@
+credentials.json
+token.json
+.venv/
+__pycache__/
+estados_postulaciones.json
+ultimo_registro_google_docs.txt
+Registro de postulaciones.txt
+documento_id.txt
+.streamlit/secrets.toml
